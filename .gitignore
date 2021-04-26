@@ -50,3 +50,13 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Config.h should not be tracked for this project cause make will create
+# config.h from config.def.h
+config.h
+
+# CTags, compile.json and clang format to be ignored
+tags
+compile_commands.json
+.clang-format
+.cache
