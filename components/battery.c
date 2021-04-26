@@ -9,7 +9,19 @@
 	#include <stdint.h>
 	#include <unistd.h>
 
-    int battery_state(const char *bat);
+    const char *bat_symbol[]  = { "", "", "", "", "", "", "", "", "", "" };
+    const char *bat_csymbol[] = { "", "", "", "", "", "", "", "", "", "" };
+
+    static const char *
+    get_symbol(unsigned int perc, int state)
+    {
+        if (state == -1) return NULL;
+
+        if (!state)
+            return (perc < 9) ? bat_symbol[perc] : bat_symbol[9];
+
+        return (perc < 9) ? bat_csymbol[perc] : bat_csymbol[9];
+    }
 
 	static const char *
 	pick(const char *bat, const char *f1, const char *f2, char *path,
@@ -28,95 +40,6 @@
 		return NULL;
 	}
 
-	const char *
-	battery_perc(const char *bat)
-	{
-		int perc;
-		char path[PATH_MAX], *symbol;
-        char *bat_symbol[] = { "", "", "", "", "", "", "", "", "", "" };
-        char *bat_csymbol[] = { "", "", "", "", "", "", "" };
-
-		if (esnprintf(path, sizeof(path),
-		              "/sys/class/power_supply/%s/capacity", bat) < 0) {
-			return NULL;
-		}
-		if (pscanf(path, "%d", &perc) != 1) {
-			return NULL;
-		}
-
-        switch(battery_state(bat)){
-                case 0:
-                    switch(perc/10){
-                        case 0:
-                            symbol = bat_symbol[0];
-                            break;
-                        case 1:
-                            symbol = bat_symbol[1];
-                            break;
-                        case 2:
-                            symbol = bat_symbol[2];
-                            break;
-                        case 3:
-                            symbol = bat_symbol[3];
-                            break;
-                        case 4:
-                            symbol = bat_symbol[4];
-                            break;
-                        case 5:
-                            symbol = bat_symbol[5];
-                            break;
-                        case 6:
-                            symbol = bat_symbol[6];
-                            break;
-                        case 7:
-                            symbol = bat_symbol[7];
-                            break;
-                        case 8:
-                            symbol = bat_symbol[8];
-                            break;
-                        default:
-                            symbol = bat_symbol[9];
-                            break;
-                    }
-                    break;
-
-                case 1:
-                    switch(perc/10){
-                        case 0:
-                        case 1:
-                        case 2:
-                            symbol = bat_csymbol[0];
-                            break;
-                        case 3:
-                            symbol = bat_csymbol[1];
-                            break;
-                        case 4:
-                            symbol = bat_csymbol[2];
-                            break;
-                        case 5:
-                        case 6:
-                            symbol = bat_csymbol[3];
-                            break;
-                        case 7:
-                        case 8:
-                            symbol = bat_csymbol[4];
-                            break;
-                        case 9:
-                            symbol = bat_csymbol[5];
-                            break;
-                        default:
-                            symbol = bat_csymbol[6];
-                            break;
-                    }
-                    break;
-
-                default:
-                    return NULL;
-                };
-
-		return bprintf("%s %d", symbol, perc);
-	}
-
     int
 	battery_state(const char *bat)
 	{
@@ -131,6 +54,25 @@
 		}
 
         return ((strcmp("Charging", state) != 0) ? 0 : 1);
+	}
+
+	const char *
+	battery_perc(const char *bat)
+	{
+		int perc;
+		char path[PATH_MAX];
+        const char *symbol;
+
+		if (esnprintf(path, sizeof(path),
+		              "/sys/class/power_supply/%s/capacity", bat) < 0) {
+			return NULL;
+		}
+		if (pscanf(path, "%d", &perc) != 1) {
+			return NULL;
+		}
+
+        symbol = get_symbol(perc/10, battery_state(bat));
+		return bprintf("%s %d", symbol, perc);
 	}
 
 	const char *
