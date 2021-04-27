@@ -9,18 +9,12 @@
 	#include <stdint.h>
 	#include <unistd.h>
 
-    const char *bat_symbol[]  = { "", "", "", "", "", "", "", "", "", "" };
-    const char *bat_csymbol[] = { "", "", "", "", "", "", "", "", "", "" };
-
     static const char *
-    get_symbol(unsigned int perc, int state)
+    get_symbol(unsigned int perc)
     {
-        if (state == -1) return NULL;
+        const char *bat_symbol[]  = { "", "", "", "", "", "", "", "", "", "" };
+        return (perc < 9) ? bat_symbol[perc] : bat_symbol[9];
 
-        if (!state)
-            return (perc < 9) ? bat_symbol[perc] : bat_symbol[9];
-
-        return (perc < 9) ? bat_csymbol[perc] : bat_csymbol[9];
     }
 
 	static const char *
@@ -40,20 +34,20 @@
 		return NULL;
 	}
 
-    int
+    const char *
 	battery_state(const char *bat)
 	{
 		char path[PATH_MAX], state[12];
 
 		if (esnprintf(path, sizeof(path),
 		              "/sys/class/power_supply/%s/status", bat) < 0) {
-			return -1;
+			return NULL;
 		}
 		if (pscanf(path, "%12s", state) != 1) {
-			return -1;
+			return NULL;
 		}
 
-        return ((strcmp("Charging", state) != 0) ? 0 : 1);
+        return ((strcmp("Charging", state) == 0) ? "" : "");
 	}
 
 	const char *
@@ -71,8 +65,8 @@
 			return NULL;
 		}
 
-        symbol = get_symbol(perc/10, battery_state(bat));
-		return bprintf("%s %d", symbol, perc);
+        symbol = get_symbol(perc/10);
+		return bprintf("%s%s %d", symbol, battery_state(bat), perc);
 	}
 
 	const char *

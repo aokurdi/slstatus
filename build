@@ -1,0 +1,9 @@
+#!/bin/env bash
+echo -e "Removing old build"
+make clean
+echo -e "Rmoving old config.h"
+rm config.h
+echo -e "Compiling ..."
+make
+echo -e "Type root pass to install"
+sudo make install
