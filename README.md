@@ -9,8 +9,5 @@ slstatus is a status monitor for window managers that use WM_NAME or stdin to fi
 ## Screen Shots:
 ___
 
-#### Charging:  
-![Charging](https://github.com/aokurdi/slstatus/blob/master/screen-shots/charging.jpg) 
-
-### Discharging:  
-![Dischargin](https://github.com/aokurdi/slstatus/blob/master/screen-shots/dischargin.jpg)
+#### Status bar:  
+![status](https://github.com/aokurdi/slstatus/blob/master/screen-shots/bar.jpg) 
